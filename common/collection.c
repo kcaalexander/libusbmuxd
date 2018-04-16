@@ -30,51 +30,51 @@
 
 void collection_init(struct collection *col)
 {
-	col->list = malloc(sizeof(void *));
-	memset(col->list, 0, sizeof(void *));
-	col->capacity = 1;
+    col->list = malloc(sizeof(void *));
+    memset(col->list, 0, sizeof(void *));
+    col->capacity = 1;
 }
 
 void collection_free(struct collection *col)
 {
-	free(col->list);
-	col->list = NULL;
-	col->capacity = 0;
+    free(col->list);
+    col->list = NULL;
+    col->capacity = 0;
 }
 
 void collection_add(struct collection *col, void *element)
 {
-	int i;
-	for(i=0; i<col->capacity; i++) {
-		if(!col->list[i]) {
-			col->list[i] = element;
-			return;
-		}
-	}
-	col->list = realloc(col->list, sizeof(void*) * col->capacity * 2);
-	memset(&col->list[col->capacity], 0, sizeof(void *) * col->capacity);
-	col->list[col->capacity] = element;
-	col->capacity *= 2;
+    int i;
+    for(i=0; i<col->capacity; i++) {
+        if(!col->list[i]) {
+            col->list[i] = element;
+            return;
+        }
+    }
+    col->list = realloc(col->list, sizeof(void*) * col->capacity * 2);
+    memset(&col->list[col->capacity], 0, sizeof(void *) * col->capacity);
+    col->list[col->capacity] = element;
+    col->capacity *= 2;
 }
 
 void collection_remove(struct collection *col, void *element)
 {
-	int i;
-	for(i=0; i<col->capacity; i++) {
-		if(col->list[i] == element) {
-			col->list[i] = NULL;
-			return;
-		}
-	}
-	fprintf(stderr, "%s: WARNING: element %p not present in collection %p (cap %d)", __func__, element, col, col->capacity);
+    int i;
+    for(i=0; i<col->capacity; i++) {
+        if(col->list[i] == element) {
+            col->list[i] = NULL;
+            return;
+        }
+    }
+    fprintf(stderr, "%s: WARNING: element %p not present in collection %p (cap %d)", __func__, element, col, col->capacity);
 }
 
 int collection_count(struct collection *col)
 {
-	int i, cnt = 0;
-	for(i=0; i<col->capacity; i++) {
-		if(col->list[i])
-			cnt++;
-	}
-	return cnt;
+    int i, cnt = 0;
+    for(i=0; i<col->capacity; i++) {
+        if(col->list[i])
+            cnt++;
+    }
+    return cnt;
 }

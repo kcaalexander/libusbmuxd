@@ -26,9 +26,9 @@
 #include <stdint.h>
 
 enum fd_mode {
-	FDM_READ,
-	FDM_WRITE,
-	FDM_EXCEPT
+    FDM_READ,
+    FDM_WRITE,
+    FDM_EXCEPT
 };
 typedef enum fd_mode fd_mode;
 
@@ -56,10 +56,10 @@ int socket_close(int fd);
 int socket_receive(int fd, void *data, size_t size);
 int socket_peek(int fd, void *data, size_t size);
 int socket_receive_timeout(int fd, void *data, size_t size, int flags,
-					 unsigned int timeout);
+                     unsigned int timeout);
 
 int socket_send(int fd, void *data, size_t size);
 
 void socket_set_verbose(int level);
 
-#endif	/* SOCKET_SOCKET_H */
+#endif    /* SOCKET_SOCKET_H */

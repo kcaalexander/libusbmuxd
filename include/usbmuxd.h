@@ -35,9 +35,9 @@ extern "C" {
  * opaque and no presumption made about the meaning of its value.
  */
 typedef struct {
-	uint32_t handle;
-	int product_id;
-	char udid[41];
+    uint32_t handle;
+    int product_id;
+    char udid[41];
 } usbmuxd_device_info_t;
 
 /**
@@ -122,7 +122,7 @@ int usbmuxd_get_device_by_udid(const char *udid, usbmuxd_device_info_t *device);
  * @param handle returned by 'usbmuxd_scan()'
  *
  * @param tcp_port TCP port number on device, in range 0-65535.
- *	common values are 62078 for lockdown, and 22 for SSH.
+ *    common values are 62078 for lockdown, and 22 for SSH.
  *
  * @return file descriptor socket of the connection, or -1 on error
  */
