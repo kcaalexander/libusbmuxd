@@ -101,6 +101,49 @@ static volatile int use_tag = 0;
 static volatile int proto_version = 1;
 static volatile int try_list_devices = 1;
 
+
+USBMUXD_API usbmuxd_t* usbmuxd_init(void)
+{
+  usbmuxd_t *usbmuxd;
+
+  usbmuxd = (usbmuxd_t*) malloc(sizeof(usbmuxd_t));
+  if (usbmuxd == NULL)
+    return NULL;
+
+  usbmuxd->event_cb = NULL;
+#ifdef WIN32
+  usbmuxd->devmon = NULL;
+#endif
+  usbmuxd->listenfd = -1;
+  usbmuxd->use_tag = 0;
+  usbmuxd->proto_version = 1;
+
+  usbmuxd->devices = (void*) malloc(sizeof(collection_t));
+  if (usbmuxd->devices == NULL) {
+      free(usbmuxd);
+      return NULL;
+  }
+
+
+  return usbmuxd;
+}
+
+
+USBMUXD_API int usbmuxd_uninit(usbmuxd_t *usbmuxd)
+{
+   if (usbmuxd == NULL)
+     return 0;
+
+   if(usbmuxd->devices)
+     free(usbmuxd->devices);
+
+   usbmuxd->devices = NULL;
+   usbmuxd->event_cb = NULL;
+
+   free(usbmuxd);
+   return 0;
+}
+
 /**
  * Finds a device info record by its handle.
  * if the record is not found, NULL is returned.

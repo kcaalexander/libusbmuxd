@@ -65,6 +65,38 @@ typedef struct {
 typedef void (*usbmuxd_event_cb_t) (const usbmuxd_event_t *event, void *user_data);
 
 /**
+ * usbmuxd context structure which need to be created and passed on to all functions.
+ */
+typedef struct {
+    void *devices;
+    usbmuxd_event_cb_t event_cb;
+#ifdef WIN32
+    HANDLE devmon = NULL;
+#else
+    pthread_t devmon;
+#endif
+    int listenfd;
+    int use_tag;
+    int proto_version;
+} usbmuxd_t;
+
+/**
+ * Initialize usbmuxd context.
+ *
+ * @return A pointer to allocated usbmuxd_t context on success or NULL on error.
+ */
+usbmuxd_t* usbmuxd_init(void);
+
+/**
+ * UnInitialize an existing usbmuxd context.
+ *
+ * @param usbmuxd A pointer to previously allocated usbmuxd_t context.
+ *
+ * @return 0 on success or negative on error.
+ */
+int usbmuxd_uninit(usbmuxd_t *usbmuxd);
+
+/**
  * Subscribe a callback function so that applications get to know about
  * device add/remove events.
  *

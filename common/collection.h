@@ -27,6 +27,7 @@ struct collection {
     int capacity;
 };
 
+
 void collection_init(struct collection *col);
 void collection_add(struct collection *col, void *element);
 void collection_remove(struct collection *col, void *element);
@@ -45,3 +46,5 @@ void collection_free(struct collection *col);
     } while(0);
 
 #endif
+
+typedef struct collection collection_t;
