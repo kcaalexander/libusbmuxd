@@ -158,6 +158,7 @@ static void *run_ctos_loop(void *arg)
 static void *acceptor_thread(void *arg)
 {
     struct client_data *cdata;
+    usbmuxd_t *usbmuxd = NULL;
     usbmuxd_device_info_t *dev_list = NULL;
 #ifdef WIN32
     HANDLE ctos = NULL;
@@ -173,13 +174,20 @@ static void *acceptor_thread(void *arg)
 
     cdata = (struct client_data*)arg;
 
-    if ((count = usbmuxd_get_device_list(&dev_list)) < 0) {
+    usbmuxd = usbmuxd_init();
+    if (!usbmuxd) {
+        printf("Can't allocate usbmuxd context.\n");
+        return  NULL;
+    }
+
+    if ((count = usbmuxd_get_device_list(usbmuxd, &dev_list)) < 0) {
         printf("Connecting to usbmuxd failed, terminating.\n");
         free(dev_list);
         if (cdata->fd > 0) {
             socket_close(cdata->fd);
         }
         free(cdata);
+        usbmuxd_uninit(usbmuxd);
         return NULL;
     }
 
@@ -192,6 +200,7 @@ static void *acceptor_thread(void *arg)
             socket_close(cdata->fd);
         }
         free(cdata);
+        usbmuxd_uninit(usbmuxd);
         return NULL;
     }
 
@@ -215,12 +224,13 @@ static void *acceptor_thread(void *arg)
             socket_close(cdata->fd);
         }
         free(cdata);
+        usbmuxd_uninit(usbmuxd);
         return NULL;
     }
 
     fprintf(stdout, "Requesting connecion to device handle == %d (serial: %s), port %d\n", dev->handle, dev->udid, device_port);
 
-    cdata->sfd = usbmuxd_connect(dev->handle, device_port);
+    cdata->sfd = usbmuxd_connect(usbmuxd, dev->handle, device_port);
     free(dev_list);
     if (cdata->sfd < 0) {
         fprintf(stderr, "Error connecting to device!\n");
@@ -243,6 +253,7 @@ static void *acceptor_thread(void *arg)
         socket_close(cdata->sfd);
     }
     free(cdata);
+    usbmuxd_uninit(usbmuxd);
 
     return NULL;
 }
