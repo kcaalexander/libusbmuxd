@@ -825,9 +825,14 @@ static void *device_monitor(void *data)
     return NULL;
 }
 
-USBMUXD_API int usbmuxd_subscribe(usbmuxd_event_cb_t callback, void *user_data)
+USBMUXD_API int usbmuxd_subscribe(usbmuxd_t *usbmuxd, usbmuxd_event_cb_t callback, void *user_data)
 {
     int res;
+
+    /* usbmuxd context don't exist. */
+    if (usbmuxd == NULL) {
+        return -EINVAL;
+    }
 
     if (!callback) {
         return -EINVAL;
@@ -836,12 +841,12 @@ USBMUXD_API int usbmuxd_subscribe(usbmuxd_event_cb_t callback, void *user_data)
 
 #ifdef WIN32
     res = 0;
-    devmon = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)device_monitor, user_data, 0, NULL);
-    if (devmon == NULL) {
+    usbmuxd->devmon = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)device_monitor, user_data, 0, NULL);
+    if (usbmuxd->devmon == NULL) {
         res = GetLastError();
     }
 #else
-    res = pthread_create(&devmon, NULL, device_monitor, user_data);
+    res = pthread_create(&(usbmuxd->devmon), NULL, device_monitor, user_data);
 #endif
     if (res != 0) {
         DEBUG(1, "%s: ERROR: Could not start device watcher thread!\n", __func__);
@@ -850,25 +855,31 @@ USBMUXD_API int usbmuxd_subscribe(usbmuxd_event_cb_t callback, void *user_data)
     return 0;
 }
 
-USBMUXD_API int usbmuxd_unsubscribe()
+
+USBMUXD_API int usbmuxd_unsubscribe(usbmuxd_t *usbmuxd)
 {
     int res;
     event_cb = NULL;
 
-    socket_shutdown(listenfd, SHUT_RDWR);
+    /* usbmuxd context don't exist. */
+    if (usbmuxd == NULL) {
+        return -EINVAL;
+    }
+
+    socket_shutdown(usbmuxd->listenfd, SHUT_RDWR);
 
 #ifdef WIN32
-    if (devmon != NULL) {
-        res = WaitForSingleObject(devmon, INFINITE);
+    if (usbmuxd->devmon != NULL) {
+        res = WaitForSingleObject(usbmuxd->devmon, INFINITE);
         if (res != 0) {
             return res;
         }
     }
 #else
-    res = pthread_kill(devmon, 0);
+    res = pthread_kill(usbmuxd->devmon, 0);
     if (res == 0) {
-        pthread_cancel(devmon);
-        res = pthread_join(devmon, NULL);
+        pthread_cancel(usbmuxd->devmon);
+        res = pthread_join(usbmuxd->devmon, NULL);
     }
     if ((res != 0) && (res != ESRCH)) {
         return res;

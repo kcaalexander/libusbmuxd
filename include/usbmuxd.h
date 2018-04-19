@@ -100,18 +100,22 @@ int usbmuxd_uninit(usbmuxd_t *usbmuxd);
  * Subscribe a callback function so that applications get to know about
  * device add/remove events.
  *
+ * @param usbmuxd A pointer to previously initialized usbmuxd context.
+ *
  * @param callback A callback function that is executed when an event occurs.
  *
  * @return 0 on success or negative on error.
  */
-int usbmuxd_subscribe(usbmuxd_event_cb_t callback, void *user_data);
+int usbmuxd_subscribe(usbmuxd_t *usbmuxd, usbmuxd_event_cb_t callback, void *user_data);
 
 /**
  * Unsubscribe callback.
  *
+ * @param usbmuxd A pointer to previously initialized usbmuxd context.
+ *
  * @return only 0 for now.
  */
-int usbmuxd_unsubscribe();
+int usbmuxd_unsubscribe(usbmuxd_t *usbmuxd);
 
 /**
  * Contacts usbmuxd and retrieves a list of connected devices.
