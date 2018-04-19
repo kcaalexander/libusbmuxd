@@ -78,6 +78,7 @@ typedef struct {
     int listenfd;
     int use_tag;
     int proto_version;
+    void *userdata;
 } usbmuxd_t;
 
 /**
@@ -128,7 +129,7 @@ int usbmuxd_unsubscribe(usbmuxd_t *usbmuxd);
  * @return number of attached devices, zero on no devices, or negative
  *   if an error occured.
  */
-int usbmuxd_get_device_list(usbmuxd_device_info_t **device_list);
+int usbmuxd_get_device_list(usbmuxd_t *usbmuxd, usbmuxd_device_info_t **device_list);
 
 /**
  * Frees the device list returned by an usbmuxd_get_device_list call
@@ -137,7 +138,7 @@ int usbmuxd_get_device_list(usbmuxd_device_info_t **device_list);
  *
  * @return 0 on success, -1 on error.
  */
-int usbmuxd_device_list_free(usbmuxd_device_info_t **device_list);
+int usbmuxd_device_list_free(usbmuxd_t *usbmuxd, usbmuxd_device_info_t **device_list);
 
 /**
  * Gets device information for the device specified by udid.
@@ -150,7 +151,8 @@ int usbmuxd_device_list_free(usbmuxd_device_info_t **device_list);
  * @return 0 if no matching device is connected, 1 if the device was found,
  *    or a negative value on error.
  */
-int usbmuxd_get_device_by_udid(const char *udid, usbmuxd_device_info_t *device);
+int usbmuxd_get_device_by_udid(usbmuxd_t *usbmuxd, const char *udid,
+                               usbmuxd_device_info_t *device);
 
 /**
  * Request proxy connect to 
@@ -162,7 +164,8 @@ int usbmuxd_get_device_by_udid(const char *udid, usbmuxd_device_info_t *device);
  *
  * @return file descriptor socket of the connection, or -1 on error
  */
-int usbmuxd_connect(const int handle, const unsigned short tcp_port);
+int usbmuxd_connect(usbmuxd_t *usbmuxd, const int handle,
+                    const unsigned short tcp_port);
 
 /**
  * Disconnect. For now, this just closes the socket file descriptor.
@@ -171,7 +174,7 @@ int usbmuxd_connect(const int handle, const unsigned short tcp_port);
  *
  * @return 0 on success, -1 on error.
  */
-int usbmuxd_disconnect(int sfd);
+int usbmuxd_disconnect(usbmuxd_t *usbmuxd, int sfd);
 
 /**
  * Send data to the specified socket.
@@ -183,7 +186,8 @@ int usbmuxd_disconnect(int sfd);
  *
  * @return 0 on success, a negative errno value otherwise.
  */
-int usbmuxd_send(int sfd, const char *data, uint32_t len, uint32_t *sent_bytes);
+int usbmuxd_send(usbmuxd_t *usbmuxd, int sfd, const char *data,
+                 uint32_t len, uint32_t *sent_bytes);
 
 /**
  * Receive data from the specified socket.
@@ -196,7 +200,8 @@ int usbmuxd_send(int sfd, const char *data, uint32_t len, uint32_t *sent_bytes);
  *
  * @return 0 on success, a negative errno value otherwise.
  */
-int usbmuxd_recv_timeout(int sfd, char *data, uint32_t len, uint32_t *recv_bytes, unsigned int timeout);
+int usbmuxd_recv_timeout(usbmuxd_t *usbmuxd, int sfd, char *data,
+                         uint32_t len, uint32_t *recv_bytes, unsigned int timeout);
 
 /**
  * Receive data from the specified socket with a default timeout.
@@ -208,7 +213,8 @@ int usbmuxd_recv_timeout(int sfd, char *data, uint32_t len, uint32_t *recv_bytes
  *
  * @return 0 on success, a negative errno value otherwise.
  */
-int usbmuxd_recv(int sfd, char *data, uint32_t len, uint32_t *recv_bytes);
+int usbmuxd_recv(usbmuxd_t *usbmuxd, int sfd, char *data, uint32_t len,
+                 uint32_t *recv_bytes);
 
 /**
  * Reads the SystemBUID
@@ -218,7 +224,7 @@ int usbmuxd_recv(int sfd, char *data, uint32_t len, uint32_t *recv_bytes);
  *
  * @return 0 on success, a negative errno value otherwise.
  */
-int usbmuxd_read_buid(char** buid);
+int usbmuxd_read_buid(usbmuxd_t *usbmuxd, char** buid);
 
 /**
  * Read a pairing record
@@ -231,7 +237,7 @@ int usbmuxd_read_buid(char** buid);
  *
  * @return 0 on success, a negative error value otherwise.
  */
-int usbmuxd_read_pair_record(const char* record_id, char **record_data, uint32_t *record_size);
+int usbmuxd_read_pair_record(usbmuxd_t *usbmuxd, const char* record_id, char **record_data, uint32_t *record_size);
 
 /**
  * Save a pairing record
@@ -242,7 +248,7 @@ int usbmuxd_read_pair_record(const char* record_id, char **record_data, uint32_t
  *
  * @return 0 on success, a negative error value otherwise.
  */
-int usbmuxd_save_pair_record(const char* record_id, const char *record_data, uint32_t record_size);
+int usbmuxd_save_pair_record(usbmuxd_t *usbmuxd, const char* record_id, const char *record_data, uint32_t record_size);
 
 /**
  * Delete a pairing record
@@ -251,7 +257,7 @@ int usbmuxd_save_pair_record(const char* record_id, const char *record_data, uin
  *
  * @return 0 on success, a negative errno value otherwise.
  */
-int usbmuxd_delete_pair_record(const char* record_id);
+int usbmuxd_delete_pair_record(usbmuxd_t *usbmuxd, const char* record_id);
 
 /**
  * Enable or disable the use of inotify extension. Enabled by default.
@@ -259,9 +265,9 @@ int usbmuxd_delete_pair_record(const char* record_id);
  * This only has an effect on linux systems if inotify support has been built
  * in. Otherwise and on all other platforms this function has no effect.
  */
-void libusbmuxd_set_use_inotify(int set);
+void libusbmuxd_set_use_inotify(usbmuxd_t *usbmuxd, int set);
 
-void libusbmuxd_set_debug_level(int level);
+void libusbmuxd_set_debug_level(usbmuxd_t *usbmuxd, int level);
 
 #ifdef __cplusplus
 }
