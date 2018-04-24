@@ -71,7 +71,7 @@ typedef struct {
     void *devices;
     usbmuxd_event_cb_t event_cb;
 #ifdef WIN32
-    HANDLE devmon = NULL;
+    HANDLE devmon;
 #else
     pthread_t devmon;
 #endif
