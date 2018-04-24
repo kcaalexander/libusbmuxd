@@ -24,6 +24,10 @@
 #define USBMUXD_H
 #include <stdint.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
